@@ -1,0 +1,389 @@
+<!doctype HTML>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>
+		cards game
+	</title>
+
+</head>
+<style type="text/css">
+	#btndeal,#myactions{
+		display: none;
+	}
+	.btn{
+		border-radius: 5px;
+		padding: 5px;
+		color:white;
+		display: inline-block;
+		text-align:center;
+		text-shadow:1px 1px #000000;
+		font:normal 700 24px/1 "Calibri",sans-serif;
+
+	}
+#maxbet{
+	padding:3px;
+	background-color:#A52A2A;
+}
+#btnhold{
+background-color: green;
+}
+#btnhit{
+	background-color: red;
+
+}
+#btndouble{
+	background-color: blue;
+}
+#btnstart{
+	background-color: #4EB1BA;
+
+}
+#btndeal{
+	background-color:#A52A2A; 	
+}
+#message{
+	text-align: center;
+	font-size: 26px;
+	font-style: bold;
+}
+h1{
+	font-family:Brush Script MT,Brush Script Std,cursive;
+	font-style:italic;
+	font-size:50px;
+	
+}
+
+</style>
+<body>
+	<h1>BLACK JACK GAME</h1>
+	<h2>Make it reach 21 or score more than the dealer</h2>
+	<div id="total">TOTAL$<span id="dollars">100</span></div>
+	<div>
+		Bet Amount$<input type="number" id="mybet" value="0" min="1" max="100"><button id="maxbet" type="button" onclick="maxbet()" class="btn">Max Bet</button>
+	</div>
+	<div id="message">ENTER THE BET AMOUNT AND PRESS THE START BUTTON</div>
+	<div id="start">
+		<div id="strbutton">
+			<button type="button" onclick="start()" class="btn" id="btnstart">START</button>
+		</div>
+	</div>
+
+	<div id="output">
+		DEALERS HAND:<span id="dValue"></span><div id="dealerHolder"></div>
+		PLAYERS HAND:<span id="pValue"></span><div id="playerHolder"></div>
+		<div id="myactions">
+			<button id="btnhold" type="button" onclick="cardAction('hold')" class="btn">HOLD</button>
+			<button id="btnhit" type="button" onclick="cardAction('hit')" class="btn">HIT</button>
+			<button id="btndouble" type="button" onclick="cardAction('double')" class="btn">DOUBLE</button>
+		</div>
+		<div><button id="btndeal" class="btn" onclick="dealNew()">DEAL</button></div>
+	</div>
+	
+</body>
+<style type="text/css">
+	.icard {
+      height: 160px;
+      width: 120px;
+      padding: 3px;
+      border: 1px solid black;
+      background-color: white;
+      border-radius: 10px;
+      position: absolute;
+      left: 100px;
+      display: inline-block;
+      font-family: 'Lato';
+    }
+
+    .top-card {
+      font-size: 30px;
+      line-height: 20px;
+      left: 2px;
+      top: 2px;
+    }
+
+    .content-card {
+      text-align: center;
+      font-size: 70px;
+    }
+
+    .bottom-card {
+      font-size: 30px;
+      line-height: 20px;
+      right: 2px;
+      bottom: 2px;
+      transform: rotate(-180deg);
+      -webkit-transform: rotate(-180deg);
+      -moz-transform: rotate(-180deg);
+      -ms-transform: rotate(-180deg);
+      -o-transform: rotate(-180deg);
+    }
+
+    .clubs,
+    .spades {
+      color: black;
+    }
+
+    .hearts,
+    .diams {
+      color: red;
+    }
+
+    .hearts .suit::after {
+      content: '\2665';
+    }
+
+    .diams .suit::after {
+      content: '\2666';
+    }
+
+    .spades .suit::after {
+      content: '\2660';
+    }
+
+    .clubs .suit::after {
+      content: '\2663';
+    }
+    #cover{
+      height: 160px;
+      width: 120px;
+      padding: 3px;
+      border: 1px solid black;
+      background-image:url("cardback.jpg");
+       
+      border-radius: 10px;
+      position: absolute;
+      left: 100px;
+    }
+
+    #dealerHolder,
+    #playerHolder {
+      height: 180px;
+      width: 500px;
+    }
+  </style>
+<script type="text/javascript">
+	
+	var output = document.getElementById("output");
+	var dealerCard=[];
+	var playerCard=[];
+	var mydollars=100;
+	var suits=["spades","clubs","hearts","diams"];
+	var numb=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+	var cards=[];
+	var cardCount=0;
+	var dealerHolder=document.getElementById("dealerHolder");
+	var	playerHolder=document.getElementById("playerHolder");
+	var pvalue =document.getElementById("pValue");
+	var dvalue =document.getElementById("dValue");
+	var playEnd=false;
+	var payoutJack=1;
+	var dollarValue = document.getElementById("dollars");
+	document.getElementById('mybet').onchange = function() {
+  	if (this.value < 0) {
+    this.value = 0;
+  	}
+  	if (this.value > mydollars) {
+    this.value = mydollars;
+ 	 }
+  	message.innerHTML = "Bet changed to $" + this.value;
+	}
+	for(s in suits){
+		var suit=suits[s][0].toUpperCase();
+		var bgcolor=(suits[s][0]=="s"||suits[s][0]=="c")?"black":"red";
+		for(n in numb){
+			//output.innerHTML+="<span style=color:"+bgcolor+">&"+suits[s]+";"+numb[n]+" "+"</span>";
+			var cardValue=(n>9)?10:parseInt(n)+1;
+			var card={
+				suit:suit,
+				icon:suits[s],
+				bgcolor:bgcolor,
+				cardnum:numb[n],
+				cardvalue:cardValue,
+			}
+			cards.push(card);
+		}
+		}
+		function start(){
+			
+			cardShuffle(cards);
+			dealNew();
+			document.getElementById('strbutton').style.display='none';
+			document.getElementById('dollars').innerHTML=mydollars;
+			//outputCard();
+		}
+		console.log(cards);
+		function cardShuffle(array){
+			for(i=array.length-1;i>0;i--){
+				var j=Math.floor(Math.random() * (i+1));
+				var temp=array[i];
+				array[i]=array[j];
+				array[j]=temp;
+			}
+			return array;
+		}
+		function maxbet(){
+			document.getElementById('mybet').value=mydollars;
+			message.innerHTML="BET VALUE CHANGED TO $"+mydollars;
+		}
+		function dealNew(){ 
+			
+			var betValue=document.getElementById('mybet').value;
+			mydollars=mydollars-betValue;
+			document.getElementById('maxbet').disabled=true;
+			document.getElementById('mybet').disabled=true;
+			document.getElementById('myactions').style.display="block";
+			message.innerHTML="GET UPTO 21 AND BEAT THE DEALER YOU BET VALUE IS $"+betValue;
+			deal();
+		}
+		function redeal(){
+			cardCount++;
+			if(cardCount>50){
+				cardShuffle(cards);
+				console.log("new deck");
+				cardCount=0;
+				message.innerHTML="NEW SHUFFLE"
+			}
+		}
+		function deal(){
+			playerCard=[];
+			dealerCard=[];
+			dealerHolder.innerHTML="";
+			playerHolder.innerHTML="";
+			for(var x=0;x<2;x++){
+			dealerCard.push(cards[cardCount]);		
+			dealerHolder.innerHTML+=cardOutput(cardCount,x);
+			if(x==0){
+				dealerHolder.innerHTML+='<div id="cover" style="left:100px"></div>';
+			}
+			redeal();
+			playerCard.push(cards[cardCount]);
+			playerHolder.innerHTML+=cardOutput(cardCount,x);
+			redeal();
+			}
+		
+			pValue.innerHTML=checktotal(playerCard);
+			console.log(dealerCard);
+			console.log(playerCard);
+			document.getElementById('btndeal').style.display='none'; 
+		}
+		function cardOutput(n,x){
+			var hypo=(x>0)?x*60+100:100;
+			return '<div class="icard '+cards[n].icon+'"style="left:'+hypo+'px;"><div class="top-card suit">'+cards[n].cardnum+'<br></div><div class="content-card suit"></div><div class="bottom-card suit">'+cards[n].cardnum+'<br></div></div>';
+		 	//return '<div class="icard ' + cards[n].icon + '" style="left:' + hpos + 'px;">  <div class="top-card suit">' + cards[n].cardnum + '<br></div>  <div class="content-card suit"></div>  <div class="bottom-card suit">' + cards[n].cardnum +
+          	//'<br></div> </div>';
+      	}
+		function outputCard(){	
+			output.innerHTML+="<span style=color:"+cards[cardCount].bgcolor+">"+cards[cardCount].cardnum+"&"+cards[n].icon+";</span> ";
+		}
+		function cardAction(a){
+			console.log(a);
+			switch(a){
+				case 'hit':playucard();//add a new set of card to players hand
+						   break;
+				case 'hold':playend();//playout and calculate
+							break;
+				case 'double'://double the current bet value
+							var betvalue = parseInt(document.getElementById('mybet').value);
+      					 	if ((mydollars - betvalue) < 0) {
+      					 		message.innerHTML="INSUFFICIENT MONEY"
+        						betvalue = betvalue + mydollars;
+        						mydollars = 0;
+      							} 
+      						else {
+        						mydollars = mydollars - betvalue;
+        						betvalue = betvalue * 2;
+      							}
+      						document.getElementById('dollars').innerHTML = mydollars;
+      						document.getElementById('mybet').value = betvalue;
+      						playucard(); // add new card to players hand
+      						playend(); // playout and calculate
+      						break;
+							  
+				default:console.log('done');
+						playend();
+						break;
+			}
+		}
+		function playucard(){
+			playerCard.push(cards[cardCount]);
+			playerHolder.innerHTML+=cardOutput(cardCount,playerCard.length-1);
+			redeal();
+			
+			var rValu=checktotal(playerCard);
+			pValue.innerHTML=rValu;
+			if(rValu>21){
+				message.innerHTML="BUSTED";
+				//message.style.font-size="38px"; // #F0F8FF;
+				//message.style.font=38px #F0F8FF;
+				//message.style.font-family=Palatino;
+				playend();
+		}
+			}
+		function playend(){
+			playEnd=true;
+			document.getElementById('cover').style.display="none";
+			document.getElementById('myactions').style.display="none";
+			document.getElementById('btndeal').style.display="block";
+			document.getElementById('maxbet').disabled=false;
+			document.getElementById('mybet').disabled=false;
+			message.innerHTML="GAME OVER";
+			dealerValue=checktotal(dealerCard);
+			dValue.innerHTML=dealerValue;
+			while(dValue<17){
+			dealerCard.push(cards[cardCount]);
+			dealerHolder.innerHTML+=cardOutput(cardCount,dealerCard.length-1);
+			cardCount++;
+			dealerValue=checktotal(dealerCard);
+			dValue.innerHTML=dealerValue;
+			}
+			var playervalue=checktotal(playerCard);
+			if(playervalue==21 && playerCard.length==2){
+				message.innerHTML="PLAYER BLACKJACK  ";
+				payoutJack=1.5;
+			}
+			var betvalue=parseInt(document.getElementById('mybet').value)*payoutJack;
+			//pValue.innerHTML=dealerValue;
+			//WHO WON???
+			if((playervalue<22 && dealerValue<playervalue)||(dealerValue>21 && playervalue<22)){
+				message.innerHTML+= '<span style="color:green;">YOU WON!!! YOU HAVE WON $'+betvalue+'</span>'+" PRESS DEAL BUTTON";
+				   //message.innerHTML += '<span style="color:green;">You WIN! You won $'+betvalue+'</span>';
+            mydollars = mydollars + (betvalue *2);
+          }
+          else if (playervalue > 21){
+            message.innerHTML += '<span style="color:red;">Dealer Wins! You lost $'+betvalue+'</span>'+" PRESS DEAL BUTTON";
+          }
+          else if (playervalue == dealerValue) {
+            message.innerHTML += '<span style="color:blue;">GAME TIES PRESS DEAL BUTTON</span>';
+            mydollars = mydollars + betvalue ; 
+          }
+          else {
+            message.innerHTML += '<span style="color:red;">Dealer Wins! You lost $'+betvalue+'</span>';
+          }
+
+          //pValue.innerHTML = dealervalue;
+          dollarValue.innerHTML = mydollars;
+        
+			}
+
+		
+
+		
+		function checktotal(arr){
+			rValue=0;
+			aceAdj=false;
+			for(var i in arr){
+				if(arr[i].cardnum=='A' && !aceAdj){
+					aceAdj=true;
+					rValue=rValue+10;
+				}
+				rValue=rValue+arr[i].cardvalue;
+			}
+			if(rValue>21 && aceAdj){
+				rValue=rValue-10;
+			}
+			return rValue;
+		}
+
+</script>
+</html>
